@@ -1,8 +1,19 @@
 [package]
-name = "string-calculator-kata"
+name = "string_calculator_kata"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "string_calculator_kata"
+path = "src/lib.rs"
+
+[[bin]]
+name = "input_string_calculator"
+path = "src/main.rs"
+
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+colored = "2.1.0"

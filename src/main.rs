@@ -7,7 +7,7 @@ pub fn add(numbers: String) -> i32 {
         0
     } else {
         numbers
-            .split(",")
+            .split(|c| c == ',' || c == '\n')
             .map(|s| {
                 s.parse::<i32>()
                     .expect("Parsing error should not happen, test only for correct input.")
@@ -38,5 +38,10 @@ mod test {
     #[test]
     fn add_more_than_two_numbers() {
         assert_eq!(27, add("4,5,7,10,1".to_string()));
+    }
+
+    #[test]
+    fn accept_new_lines_beetween_numbers() {
+        assert_eq!(27, add("4\n5,7\n10,1".to_string()));
     }
 }

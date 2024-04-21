@@ -1,3 +1,5 @@
+use regex::Regex;
+
 const PARSING_ERROR: &str = "Parsing error should not happen, assuming only correct input.";
 const NEGATIVE_ERROR: &str = "negatives not allowed:";
 const CUSTOM_DELIMITER: usize = 2;
@@ -60,7 +62,21 @@ pub fn add(numbers: &str) -> Result<i32, String> {
                 .nth(CUSTOM_DELIMITER)
                 .expect(PARSING_ERROR);
             parse_start = 4;
+
+            // If custom delimiter is sadly chosen as '-' than I need to check for negatives numers
+            if delimiter == '-' {
+                let re = Regex::new(r"--(\d+)").unwrap();
+                for capture in re.captures_iter(numbers) {
+                    if let Some(number) = capture.get(1) {
+                        negatives.push(format!("-{}", number.as_str()));
+                    }
+                }
+                if !negatives.is_empty() {
+                    return Err(format!("{} {}", NEGATIVE_ERROR, negatives.join(" ")))
+                }
+            }
         }
+        
 
         // Calculate the sum
         let sum = numbers[parse_start..]
@@ -128,7 +144,18 @@ mod test {
     }
 
     #[test]
+    fn custom_delimiter_negatives() {
+        assert_eq!(add("//;\n1;-2;4;-6"), Err("negatives not allowed: -2 -6".to_owned()))
+    }
+    #[test]
     fn ignore_big_numbers() {
         assert_eq!(add("2,1001"), Ok(2));
+    }
+
+    #[test]
+    fn dash_custom_delimiter() {
+        assert_eq!(add("//-\n1--2-3"), Err("negatives not allowed: -2".to_owned()));
+        assert_eq!(add("//-\n1--2--3"), Err("negatives not allowed: -2 -3".to_owned()));
+        assert_eq!(add("//-\n1-2-3"), Ok(6));
     }
 }

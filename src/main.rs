@@ -12,7 +12,7 @@ pub fn main() {
 
         let help_msg = "
     - Enter numbers separated by a comma 
-    - Use \"//[delimiter]\\n\" to specify a custom delimiter
+    - To specifiy a custom delimiter start with \"//[delimiter]\\n\"
     - No negatives number allowed
     - Values greater than 1000 will be ignored\n".truecolor(128, 128, 128);
     

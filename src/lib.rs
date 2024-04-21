@@ -21,7 +21,7 @@ const CUSTOM_DELIMITER: usize = 2;
 /// 
 /// # Example
 /// ```rust
-/// use string_calculator_kata::add;
+/// use string_calculator_lib::add;
 /// 
 /// 
 /// let sum = add("2,5,7");

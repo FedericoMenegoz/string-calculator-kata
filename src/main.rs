@@ -1,5 +1,5 @@
 use std::process::exit;
-use string_calculator_kata::add;
+use string_calculator_lib::add;
 use colored::*;
 
 pub fn main() {

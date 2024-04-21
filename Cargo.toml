@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "string_calculator_kata"
+name = "string_calculator_lib"
 path = "src/lib.rs"
 
 [[bin]]
-name = "input_string_calculator"
+name = "string_calculator"
 path = "src/main.rs"
 
 

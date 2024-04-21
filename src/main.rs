@@ -34,4 +34,9 @@ mod test {
     fn add_two_numbers() {
         assert_eq!(9, add("4,5".to_string()));
     }
+
+    #[test]
+    fn add_more_than_two_numbers() {
+        assert_eq!(27, add("4,5,7,10,1".to_string()));
+    }
 }

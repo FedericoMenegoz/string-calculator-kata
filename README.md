@@ -5,5 +5,6 @@ The `string_calculator` (`src/main.rs`) is a simple program that take one argume
 ## Compiling and running
 To run the `string_calculator` from the root directory of the project:
 - `cargo run "args"`
+
 To test the `add` function run:
 - `cargo test`

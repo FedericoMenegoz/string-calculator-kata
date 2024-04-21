@@ -28,6 +28,6 @@ pub fn main() {
 
     match add(&input) {
         Ok(val) => println!("The sum is: {val}"),
-        Err(s) => println!("{s}"),
+        Err(s) => panic!("{}", s.red().bold()),
     }
 }

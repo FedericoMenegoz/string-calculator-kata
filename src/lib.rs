@@ -61,7 +61,7 @@ pub fn add(numbers: &str) -> Result<i32, String> {
             delimiter = numbers.chars().nth(CUSTOM_DELIMITER).expect(PARSING_ERROR);
             parse_start = 4;
 
-            // If custom delimiter is sadly chosen as '-' than I need to check for negatives numers
+            // If custom delimiter is sadly chosen as '-' then I need to check for negatives numers
             if delimiter == '-' {
                 let re = Regex::new(r"^-(\d+)|--(\d+)").unwrap();
                 for m in re.captures_iter(&numbers[parse_start..]) {

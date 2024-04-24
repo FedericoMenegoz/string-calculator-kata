@@ -3,6 +3,9 @@ use regex::Regex;
 const PARSING_ERROR: &str = "Parsing error should not happen, assuming only correct input.";
 const NEGATIVE_ERROR: &str = "negatives not allowed:";
 const CUSTOM_DELIMITER: usize = 2;
+const REGEX_SPECIAL_CHAR: &[char; 14] = &[
+    '.', '+', '*', '?', '^', '$', '(', ')', '[', ']', '{', '}', '|', '\\',
+];
 /// Adds the numbers in the given string and returns the sum.
 ///
 /// # Arguments
@@ -52,17 +55,35 @@ pub fn add(numbers: &str) -> Result<i32, String> {
     if numbers.trim().is_empty() {
         Ok(0)
     } else {
-        let mut delimiter = ',';
         let mut parse_start = 0;
         let mut negatives = Vec::new();
+        let mut delimiters = vec![",".to_owned()];
+        let mut sum = 0;
 
         // Check for custom delimiter
-        if numbers.starts_with("//") {
-            delimiter = numbers.chars().nth(CUSTOM_DELIMITER).expect(PARSING_ERROR);
+        // string delimiter
+        if numbers.starts_with("//[") {
+            delimiters = numbers[CUSTOM_DELIMITER..]
+                // first string with delimiter end with new line
+                .split('\n')
+                // get first line
+                .nth(0)
+                .expect(PARSING_ERROR)
+                .split(['[', ']'])
+                .filter(|s| !s.is_empty())
+                .map(|s| s.to_owned())
+                .collect();
+
+            parse_start = numbers.chars().take_while(|c| *c != '\n').count() + 1;
+        }
+        // Single char delimiter
+        else if numbers.starts_with("//") {
+            delimiters[0] = numbers[2..3].to_owned();
+
             parse_start = 4;
 
             // If custom delimiter is sadly chosen as '-' then I need to check for negatives numers
-            if delimiter == '-' {
+            if delimiters[0] == "-" {
                 let re = Regex::new(r"^-(\d+)|--(\d+)").unwrap();
                 for m in re.captures_iter(&numbers[parse_start..]) {
                     // Captures first negative if any (only one dash)
@@ -79,23 +100,38 @@ pub fn add(numbers: &str) -> Result<i32, String> {
                 }
             }
         }
+        // Using regex to separate each number,
+        // need to escape special regex charachter ., +, *, ?, ^, $, (, ), [, ], {, }, |, \.
+        for delimiter in delimiters.iter_mut() {
+            *delimiter = delimiter
+                .chars()
+                .map(|c| {
+                    if REGEX_SPECIAL_CHAR.contains(&c) {
+                        format!("\\{c}")
+                    } else {
+                        format!("{c}")
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join("")
+        }
+
+        // Create the regex in order to match any delimiter
+        let patterns = delimiters.join("|");
+        let split_regex = Regex::new(&patterns).unwrap();
+        // Replacing new line with the first delimiter
+        let no_space = numbers[parse_start..].replace("\n", &delimiters[0]);
 
         // Calculate the sum
-        let sum = numbers[parse_start..]
-            .trim()
-            .split(|c| c == delimiter || c == '\n')
-            .map(|s| {
-                // Assuming the input is valid.
-                let number = s.trim().parse::<i32>().expect(PARSING_ERROR);
-                // Save negatives number
-                if number < 0 {
-                    negatives.push(number.to_string());
-                }
-                number
-            })
-            // Ignore high numbers
-            .filter(|n| *n <= 1000)
-            .sum();
+        for str in split_regex.split(&no_space) {
+            println!("{str}");
+            let number = str.parse::<i32>().expect(PARSING_ERROR);
+            if number < 0 {
+                negatives.push(number.to_string());
+            } else if number <= 1000 {
+                sum += number
+            }
+        }
 
         if negatives.is_empty() {
             Ok(sum)
@@ -171,5 +207,28 @@ mod test {
             Err("negatives not allowed: -2 -3".to_owned())
         );
         assert_eq!(add("//-\n1-2-3"), Ok(6));
+    }
+
+    #[test]
+    fn custom_length_delimiter() {
+        assert_eq!(add("//[***]\n3***4***3"), Ok(10));
+    }
+
+    #[test]
+    fn multiple_custom_length_delimiter() {
+        assert_eq!(add("//[xxx][***]\n3xxx5***8"), Ok(16));
+    }
+
+    #[test]
+    fn multiple_custom_length_delimiter_special_chars() {
+        assert_eq!(add("//[.][***][\\][??][---]\n1.2.6***1??10\\10"), Ok(30))
+    }
+
+    #[test]
+    fn is_dashes_good_in_multiple_delimiters() {
+        assert_eq!(
+            add("//[--][,]\n1--2,6---7"),
+            Err("negatives not allowed: -7".to_owned())
+        );
     }
 }
